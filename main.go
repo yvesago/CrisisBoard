@@ -2,7 +2,7 @@ package main
 
 /*
 
-../gotest/bin/go-bindata -o myweb.go web/*
+./go-bindata -o myweb.go web/*
 
 go test
 
@@ -25,7 +25,8 @@ import (
 
 var version string = "0.0.1"
 
-const letterBytes = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+//const letterBytes = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+const letterBytes = "abcdefghijkmnopqrstuvwxyz23456789" // simpliest password
 
 func RandStringBytes(n int) string {
 	b := make([]byte, n)
@@ -93,6 +94,8 @@ func main() {
 	fmt.Println("  =========")
 	fmt.Println("  Server: " + serv)
 	fmt.Println("    Pass: " + pass)
+	fmt.Println(" ")
+	fmt.Println("  version: " + version)
 	fmt.Println("#--------------------------------------------#")
 
 	// Add Assets
@@ -187,7 +190,7 @@ func main() {
 				a, e = Stored(s, b)
 			}
 
-            // TODO: really want to send read history to all clients ?
+			// TODO: really want to send read history to all clients ?
 			byteArray, _ := json.Marshal(a)
 			m.Broadcast(byteArray)
 		}
