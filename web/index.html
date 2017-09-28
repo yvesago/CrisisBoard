@@ -5,6 +5,7 @@
  <title>Tableau de bord</title>
  <style>
  body {font-family: Helvetica, Arial, Sans-Serif;}
+ #alerte { color: orange; font-size: larger; font-weight: bold; }
  #h {
     margin: 2em 0 2em;
     float:left;
@@ -103,17 +104,14 @@ blockquote {
 }
 .hm {
     border-radius: 10px;
-
     width: 32px;
     height: 26px;
     padding: 2px 10px 2px 10px;
-    
     background: #fff;
     border: 2px solid #aaa;
     color: #aaa;
     text-align: center;
-    
-    font: 24px Arial, sans-serif;
+    font: larger Arial, sans-serif;
 }
 .select {
   background: #ddd;
@@ -129,7 +127,7 @@ blockquote {
   margin: 5px 0px 5px 5px;
   background-color: coral;
   color: white;
-  font-size: 1.5vw;
+  font-size: larger;
   position: absolute;
   top: 85%;
   right: 0%;
@@ -176,7 +174,7 @@ blockquote {
     var r = n.innerText.split(":")
     if (r != null) { 
      d.setHours(r[0]); d.setMinutes(r[1]);
-     var diff = (dt - d) / 60000;
+     var diff = Math.floor((dt - d) / 60000);
      document.getElementById('diff').innerHTML =
         diff + " mn";
 	    if ( diff < -15 || diff > 30) {
@@ -239,6 +237,8 @@ blockquote {
  <div id="but">
   <button id="reg" class="button button1" onclick="register();"> Enregistrer </button>
   <button id="val" class="button button1" onclick="send();"> Validation </button>
+  <br />
+  <span id="alerte">En cours de rédaction</span>
  </div> 
  <div id="update">&nbsp;</div>
 </div>
@@ -310,32 +310,37 @@ blockquote {
 	var wcom = document.getElementById("com");
 	var whist = document.getElementById("hist");
 	var breg =  document.getElementById("reg");
+	var wbut =  document.getElementById("but");
 	var update =  document.getElementById("update");
     var x = document.getElementById('share');
     var menu = document.getElementById('menu');
     var serv = document.getElementById('serv');
     var pass = document.getElementById('pass');
     var currentID = 0;
+    var view = 'write'; // or 'read' for history, or 'valid' for last validation
 
     ws.onmessage = function (msg) {
       var msgserver = msg.data.split('--');
-      if (msgserver[0] === 'share') {
+      if (msgserver[0] === 'share') { // view share menu
         serv.innerText = msgserver[1]
         pass.innerText = msgserver[2]
 		return;
       }
+
 	  var m = JSON.parse(msg.data);
+      // Find view status
 	  if (m.cmd === "read" ) {
-		document.getElementById("but").style.display = "none";
+        view = 'read';
+        if (m.id === currentID - 1) {
+         view = 'valid'
+        }
       }
       else if (m.id != 0) {
+        view = 'write'
         currentID = m.id;
-	    breg.disabled = false;
-	    breg.className = "button button1";
       }
 
-	  //wact.innerHTML = currentID;
-
+      // History of validations menus
       if (m.id != 0) {
         reg = true;
         whist.innerHTML = "Validations: ";
@@ -349,10 +354,23 @@ blockquote {
           }
 
 		if (m.cmd === "read" ) {
-		  whist.innerHTML += "  <a href='" + window.location.href + "'>En cours</a>";
+		  whist.innerHTML += "  <a href='" + window.location.href + "'>Rédiger</a>";
 		}
       }
 
+      // Show view
+      if (view == 'write') {
+	    breg.disabled = false;
+	    breg.className = "button button1";
+	    wbut.style.display = "true";
+        // TODO Orange border on b class
+      }
+      else {
+	    wbut.style.display = "none";
+        // TODO disable edit
+      }
+
+      // Update contents
 	  if (m.obj) {
 			wobj.innerHTML = m.obj;
             }
@@ -375,6 +393,8 @@ blockquote {
             var d = new Date(Date.parse(m.updated));
 			update.innerHTML = "Enregistré: <b>" + d.toLocaleString() + '</b> depuis ' + m.ip;
       }
+
+	  // wact.innerHTML = view;
     }
 
 
