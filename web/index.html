@@ -102,7 +102,7 @@ blockquote {
     color: #aaa;
 }
 .hm {
-    border-radius: 30%;
+    border-radius: 10px;
 
     width: 32px;
     height: 26px;
@@ -117,7 +117,11 @@ blockquote {
 }
 .select {
   background: #ddd;
-} 
+}
+.lastval {
+  color: white;
+  background: #4CAF50;
+}
 
 .mstyle {
   border-radius: 10px 0 0 10px;
@@ -334,11 +338,16 @@ blockquote {
 
       if (m.id != 0) {
         reg = true;
-        whist.innerHTML = "Historique: ";
+        whist.innerHTML = "Validations: ";
+
         for (i = 1; i < currentID; i++) {
-		var span = (i === m.id)?"<span class='hm select'>":"<span class='hm'>"; 
-         whist.innerHTML += " " + span + "<a onclick='read(" + i + ");'>" + i + '</a></span>';
-        }
+          var cclass = 'hm'; var ctxt = i;
+          if (i === currentID - 1) { ctxt = "Dernière Validation"; }
+          if (i === m.id) { cclass += " select"; }
+          if (i === currentID - 1 && i === m.id ) { cclass += " lastval"; ctxt = "Validé"; }
+           whist.innerHTML += " <span class='" + cclass + "'><a onclick='read(" + i + ");'>" + ctxt + '</a></span>';
+          }
+
 		if (m.cmd === "read" ) {
 		  whist.innerHTML += "  <a href='" + window.location.href + "'>En cours</a>";
 		}
@@ -364,7 +373,7 @@ blockquote {
       }
 	  if (m.updated && m.id != 0) {
             var d = new Date(Date.parse(m.updated));
-			update.innerHTML = "Enregistré: " + d.toLocaleString() + ' depuis ' + m.ip;
+			update.innerHTML = "Enregistré: <b>" + d.toLocaleString() + '</b> depuis ' + m.ip;
       }
     }
 
@@ -390,6 +399,7 @@ blockquote {
     function send() {
       if(confirm("Confirmée ?")){
         ws.send(sendObj('val'));
+        read(currentID);
       }
     }
 
