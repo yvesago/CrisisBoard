@@ -20,6 +20,7 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -42,6 +43,9 @@ func init() {
 
 func main() {
 	pass := RandStringBytes(8)
+	if os.Getenv("CRISIS_KEY") != "" {
+		pass = os.Getenv("CRISIS_KEY")
+	}
 
 	servPtr := flag.String("s", "", "Serveur")
 	usrPtr := flag.String("u", "crise", "Utilisateur")
@@ -124,20 +128,20 @@ func main() {
 		}
 	})
 
-	r.GET("/med/default.min.css", func(c *gin.Context) {
+	r.GET("/board/med/default.min.css", func(c *gin.Context) {
 		c.Data(http.StatusOK, "text/css; charset=utf-8", dcssd)
 	})
 
-	r.GET("/med/medium-editor.min.css", func(c *gin.Context) {
+	r.GET("/board/med/medium-editor.min.css", func(c *gin.Context) {
 		c.Data(http.StatusOK, "text/css; charset=utf-8", dcssme)
 	})
 
-	r.GET("/med/medium-editor.min.js", func(c *gin.Context) {
+	r.GET("/board/med/medium-editor.min.js", func(c *gin.Context) {
 		c.Data(http.StatusOK, "application/javascript", djsme)
 	})
 
 	// Websocket router
-	r.GET("/ws", func(c *gin.Context) {
+	r.GET("/board/ws", func(c *gin.Context) {
 		ml := make(map[string]interface{})
 		ml["cip"] = c.ClientIP()
 		ml["db"] = db

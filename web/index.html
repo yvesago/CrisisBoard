@@ -209,9 +209,9 @@ blockquote {
     var t = setTimeout(checkTimePoint, 5000);
  }
  </script>
-<script src="med/medium-editor.min.js"></script>
-<link rel="stylesheet" href="med/medium-editor.min.css">
-<link rel="stylesheet" href="med/default.min.css">
+<script src="/board/med/medium-editor.min.js"></script>
+<link rel="stylesheet" href="/board/med/medium-editor.min.css">
+<link rel="stylesheet" href="/board/med/default.min.css">
 </head>
 <body onload="checkTimePoint(); startTime();">
 <center>
@@ -299,7 +299,7 @@ blockquote {
 
 <script>var editor = new MediumEditor('.editable');</script>
 <script>
-    var url = "ws://" + window.location.host + "/ws";
+    var url = "ws://" + window.location.host + "/board/ws";
     var ws = new WebSocket(url);
      
 	var wobj = document.getElementById("obj");
