@@ -227,7 +227,7 @@ blockquote {
    </div>
  </fieldset>
  <div id="npt">Prochain point:<br /><!-- <input id="n" type=text size=4></input> -->
-  [ <span class="editable" id="n">HH:MM</span> ] <br />
+  <span class="editable" id="n">HH:MM</span><br />
   <span id="diff"></span>
  </div>
 </div>
@@ -354,7 +354,7 @@ blockquote {
           }
 
 		if (m.cmd === "read" ) {
-		  whist.innerHTML += "  <a href='" + window.location.href + "'>Rédiger</a>";
+                 whist.innerHTML += "  <a onclick='reload();'>Rédiger</a>";
 		}
       }
 
@@ -362,11 +362,11 @@ blockquote {
       if (view == 'write') {
 	    breg.disabled = false;
 	    breg.className = "button button1";
-	    wbut.style.display = "true";
+           wbut.style.visibility="visible";
         // TODO Orange border on b class
       }
       else {
-	    wbut.style.display = "none";
+           wbut.style.visibility="hidden";
         // TODO disable edit
       }
 
@@ -397,6 +397,10 @@ blockquote {
 	  // wact.innerHTML = view;
     }
 
+    function reload() {
+      wbut.style.visibility="visible";
+      ws.send("current");
+    }
 
     function sendObj(cmd) {
     return (JSON.stringify({
