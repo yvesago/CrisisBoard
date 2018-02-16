@@ -41,86 +41,16 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func main() {
-	pass := RandStringBytes(8)
-	if os.Getenv("CRISIS_KEY") != "" {
-		pass = os.Getenv("CRISIS_KEY")
-	}
+func server(r *gin.Engine, data []byte, serv string, pass string, file string, debug bool) {
 
-	servPtr := flag.String("s", "", "Serveur")
-	usrPtr := flag.String("u", "crise", "Utilisateur")
-	filePtr := flag.String("f", "crisisboard.sql", "Fichier base de données")
-	portPtr := flag.String("p", "5001", "Port")
-	debugPtr := flag.Bool("d", false, "Debug mode")
-	flag.Parse()
-
-	p := *portPtr
-	user := *usrPtr
-	file := *filePtr
-	serv := *servPtr
-	debug := *debugPtr
-
-	if debug == false {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	// Config server
 	db := InitDb(file)
 
-	r := gin.New()
-
-	r.Use(gin.Recovery())
-	if debug == true {
-		r.Use(gin.Logger())
-	}
 	m := melody.New()
 	m.Config.MaxMessageSize = 4294967296 //2^32
 
-	addrs, _ := net.InterfaceAddrs()
-
-	if serv == "" {
-		for _, a := range addrs {
-			if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-				serv = ipnet.IP.String()
-				if ipnet.IP.To4() != nil { // prefer shorter IPv4 if available
-					break
-				}
-			}
-		}
-		serv = "http://" + serv + ":" + p + "/share/"
-	}
-
-	fmt.Println("#--------------------------------------------#")
-	fmt.Println(" ")
-	fmt.Println("    Usage =>  http://localhost:" + p + "/  <=")
-	fmt.Println(" ")
-	fmt.Println("  Partage :")
-	fmt.Println("  =========")
-	fmt.Println("  Server: " + serv)
-	fmt.Println("    Pass: " + pass)
-	fmt.Println(" ")
-	fmt.Println("  version: " + version)
-	fmt.Println("#--------------------------------------------#")
-
-	// Add Assets
-	data, err := Asset("web/index.html")
-	if err != nil {
-		// asset was not found.
-		fmt.Println(err)
-	}
 	dcssd, _ := Asset("web/med/default.min.css")
 	dcssme, _ := Asset("web/med/medium-editor.min.css")
 	djsme, _ := Asset("web/med/medium-editor.min.js")
-
-	// Manage share auth
-	auth := r.Group("/", gin.BasicAuthForRealm(gin.Accounts{
-		user: pass,
-	}, "Utilisateur: "+user))
-
-	// Gin router
-	auth.GET("/share", func(c *gin.Context) {
-		c.Data(http.StatusOK, "text/html; charset=utf-8", data)
-	})
 
 	r.GET("/", func(c *gin.Context) {
 		if c.ClientIP() == "::1" {
@@ -200,5 +130,85 @@ func main() {
 		}
 	})
 
+}
+
+func main() {
+	pass := RandStringBytes(8)
+	if os.Getenv("CRISIS_KEY") != "" {
+		pass = os.Getenv("CRISIS_KEY")
+	}
+
+	servPtr := flag.String("s", "", "Serveur")
+	usrPtr := flag.String("u", "crise", "Utilisateur")
+	filePtr := flag.String("f", "crisisboard.sql", "Fichier base de données")
+	portPtr := flag.String("p", "5001", "Port")
+	debugPtr := flag.Bool("d", false, "Debug mode")
+	flag.Parse()
+
+	p := *portPtr
+	user := *usrPtr
+	file := *filePtr
+	serv := *servPtr
+	debug := *debugPtr
+
+	if debug == false {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	// Config server
+
+	r := gin.New()
+
+	r.Use(gin.Recovery())
+	if debug == true {
+		r.Use(gin.Logger())
+	}
+
+	addrs, _ := net.InterfaceAddrs()
+
+	if serv == "" {
+		for _, a := range addrs {
+			if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				serv = ipnet.IP.String()
+				if ipnet.IP.To4() != nil { // prefer shorter IPv4 if available
+					break
+				}
+			}
+		}
+		serv = "http://" + serv + ":" + p + "/share/"
+	}
+
+	fmt.Println("#--------------------------------------------#")
+	fmt.Println(" ")
+	fmt.Println("    Usage =>  http://localhost:" + p + "/  <=")
+	fmt.Println(" ")
+	fmt.Println("  Partage :")
+	fmt.Println("  =========")
+	fmt.Println("  Server: " + serv)
+	fmt.Println("    Pass: " + pass)
+	fmt.Println(" ")
+	fmt.Println("  version: " + version)
+	fmt.Println("#--------------------------------------------#")
+
+	// Add Assets
+	data, err := Asset("web/index.html")
+	if err != nil {
+		// asset was not found.
+		fmt.Println(err)
+	}
+
+	// Manage share auth
+	auth := r.Group("/", gin.BasicAuthForRealm(gin.Accounts{
+		user: pass,
+	}, "Utilisateur: "+user))
+
+	// Gin router
+	auth.GET("/share", func(c *gin.Context) {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", data)
+	})
+
+	server(r, data, serv, pass, file, debug)
+
 	r.Run(":" + p)
+
 }
