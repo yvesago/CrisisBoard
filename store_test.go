@@ -39,38 +39,72 @@ func TestBoardModel(t *testing.T) {
 
 	r, _ := Stored(&s, b)
 	//fmt.Printf("res %+v\n", r)
-	assert.Equal(t, int64(1), r.Id, "Insert Sucess")
+	assert.Equal(t, int64(1), r.Id, "Insert Success")
 
 	b.Id = 1
 	b.Obj = "obj1"
 	r, _ = Stored(&s, b)
-	assert.Equal(t, b.Obj, r.Obj, "Update Sucess")
-	assert.Equal(t, int64(1), r.Id, "Update Sucess")
-
-	/* now in main.go
-
-	    b.Cmd = "val"
-	    b.Obj = "obj3"
-		r, _ = Stored(&s, b)
-	    assert.Equal(t, b.Obj, r.Obj, "Validate Sucess")
-	    assert.Equal(t, int64(2), r.Id, "New raw. Validate Sucess")
-	*/
+	assert.Equal(t, b.Obj, r.Obj, "Update Success")
+	assert.Equal(t, int64(1), r.Id, "Update Success")
 
 	b.Id = 0
 	b.Obj = "obj2"
 	r, _ = Stored(&s, b)
-	assert.Equal(t, b.Obj, r.Obj, "Insert Sucess")
-	assert.Equal(t, int64(2), r.Id, "Insert Sucess")
+	assert.Equal(t, b.Obj, r.Obj, "Insert Success")
+	assert.Equal(t, int64(2), r.Id, "Insert Success")
 
 	var c Board
 
 	c = Board{Cmd: "read:1"}
 	r, _ = Stored(&s, c)
-	assert.Equal(t, "obj1", r.Obj, "read 1 Sucess")
+	assert.Equal(t, "obj1", r.Obj, "read 1 Success")
 
 	c = Board{Cmd: "current"}
 	r, _ = Stored(&s, c)
 	assert.Equal(t, int64(2), r.Id, "last stored is 2")
+}
+
+func contains(s []string, t string) bool {
+	for _, v := range s {
+		if v == t {
+			return true
+		}
+	}
+	return false
+}
+
+func TestAsset(t *testing.T) {
+	defer func() {
+		deleteFile("t/web/index.html")
+		deleteFile("t/web/")
+		deleteFile("t/")
+	}()
+	_, err := Asset("web/index.html")
+	if err != nil {
+		// asset was not found.
+		fmt.Println(err)
+	}
+	d, _ := AssetInfo("web/index.html")
+	assert.Equal(t, "web/index.html", d.Name(), "name of asset")
+	a := AssetNames()
+	liste := []string{
+		"web/index.html",
+		"web/med/default.min.css",
+		"web/med/medium-editor.min.css",
+		"web/med/medium-editor.min.js",
+	}
+	for _, la := range a {
+		assert.Equal(t, true, contains(liste, la), "asset in list")
+	}
+
+	a, _ = AssetDir("web/med")
+	liste = []string{"default.min.css", "medium-editor.min.css", "medium-editor.min.js"}
+	for _, la := range a {
+		assert.Equal(t, true, contains(liste, la), "asset in list")
+	}
+	RestoreAssets("t/", "web/index.html")
+	_, e := os.Stat("t/web/index.html")
+	assert.Equal(t, nil, e, "restored file exist")
 }
 
 func TestServer(t *testing.T) {
@@ -171,7 +205,7 @@ func TestServer(t *testing.T) {
 	c.ReadJSON(&respbv)
 
 	assert.Equal(t, "reg", respbv.Cmd, "test return cmd")
-	assert.Equal(t, int64(2), respbv.Id, "register whith validation: new Id")
+	assert.Equal(t, int64(2), respbv.Id, "register with validation: new Id")
 
 	// register don't change id
 	b = Board{Id: respbv.Id, Cmd: "reg", Obj: "obj", Npt: "11:12", Ev: "ev", Bil: "bil", Act: "act", Com: "com"}
