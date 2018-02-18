@@ -137,7 +137,7 @@ func server(r *gin.Engine, serv string, user string, pass string, file string, d
 					fmt.Printf("store: val %v", e)
 				}
 				b.Id = 0
-				a, e = Stored(s, b)
+				a, _ = Stored(s, b)
 			}
 
 			// TODO: really want to send read history to all clients ?

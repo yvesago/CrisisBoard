@@ -122,7 +122,7 @@ func TestServer(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-    banner("[some-test-port]", "", "[random pass]", version)
+	banner("[some-test-port]", "", "[random pass]", version)
 
 	server(r, "http://exemple.com", "crise", "qwerty", testFileName, true)
 
