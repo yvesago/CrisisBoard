@@ -103,5 +103,5 @@ func Stored(s *melody.Session, b Board) (Board, error) {
 
 	}
 
-	return b, errors.New("Unk cmd")
+	//return b, errors.New("Unk cmd")
 }

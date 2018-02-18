@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -107,6 +108,11 @@ func TestAsset(t *testing.T) {
 	assert.Equal(t, nil, e, "restored file exist")
 }
 
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
 func TestServer(t *testing.T) {
 	testFileName := "_test.sql"
 	defer deleteFile(testFileName)
@@ -116,25 +122,9 @@ func TestServer(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-	data, err := Asset("web/index.html")
-	if err != nil {
-		// asset was not found.
-		fmt.Println(err)
-	}
+    banner("[some-test-port]", "", "[random pass]", version)
 
-	/*
-		// Manage share auth
-		auth := r.Group("/", gin.BasicAuthForRealm(gin.Accounts{
-			user: pass,
-		}, "Utilisateur: "+user))
-
-		// Gin router
-		auth.GET("/share", func(c *gin.Context) {
-			c.Data(http.StatusOK, "text/html; charset=utf-8", data)
-		})
-	*/
-
-	server(r, data, "http://exemple.com", "qwerty", testFileName, true)
+	server(r, "http://exemple.com", "crise", "qwerty", testFileName, true)
 
 	/**
 	  test template
@@ -148,6 +138,32 @@ func TestServer(t *testing.T) {
 	r.ServeHTTP(resp1, req)
 	//fmt.Printf("%+v\n", resp1.Body)
 	assert.Equal(t, 200, resp1.Code, "template success")
+
+	liste := []string{
+		"/board/med/default.min.css",
+		"/board/med/medium-editor.min.css",
+		"/board/med/medium-editor.min.js",
+	}
+	for _, la := range liste {
+		req, _ := http.NewRequest("GET", la, nil)
+		resp1 = httptest.NewRecorder()
+		r.ServeHTTP(resp1, req)
+		assert.Equal(t, 200, resp1.Code, "template success")
+	}
+
+	/**
+	  test basic auth
+	  **/
+	req, err = http.NewRequest("GET", "/share", nil)
+	req.Header.Add("Authorization", "Basic "+basicAuth("crise", "qwerty"))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	resp1 = httptest.NewRecorder()
+	r.ServeHTTP(resp1, req)
+	//fmt.Printf("%+v\n", resp1.Body)
+	assert.Equal(t, 200, resp1.Code, "basic auth success")
 
 	/**
 	  test websocket
