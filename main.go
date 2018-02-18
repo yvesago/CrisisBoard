@@ -87,11 +87,21 @@ func server(r *gin.Engine, serv string, user string, pass string, file string, d
 	})
 
 	// Websocket router
-	r.GET("/board/ws", func(c *gin.Context) {
+	auth.GET("/share/board/ws", func(c *gin.Context) {
 		ml := make(map[string]interface{})
 		ml["cip"] = c.ClientIP()
 		ml["db"] = db
 		m.HandleRequestWithKeys(c.Writer, c.Request, ml)
+	})
+
+	r.GET("/board/ws", func(c *gin.Context) {
+		// TODO
+		//	if c.ClientIP() == "::1" {
+		ml := make(map[string]interface{})
+		ml["cip"] = c.ClientIP()
+		ml["db"] = db
+		m.HandleRequestWithKeys(c.Writer, c.Request, ml)
+		//	}
 	})
 
 	// Manage websocket messages
