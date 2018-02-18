@@ -88,6 +88,7 @@ func server(r *gin.Engine, serv string, user string, pass string, file string, d
 
 	// Websocket router
 	auth.GET("/share/board/ws", func(c *gin.Context) {
+		//    fmt.Printf("=+= %+v =+= \n", c.Request.Header["Authorization"])
 		ml := make(map[string]interface{})
 		ml["cip"] = c.ClientIP()
 		ml["db"] = db
@@ -95,13 +96,20 @@ func server(r *gin.Engine, serv string, user string, pass string, file string, d
 	})
 
 	r.GET("/board/ws", func(c *gin.Context) {
-		// TODO
-		//	if c.ClientIP() == "::1" {
-		ml := make(map[string]interface{})
-		ml["cip"] = c.ClientIP()
-		ml["db"] = db
-		m.HandleRequestWithKeys(c.Writer, c.Request, ml)
-		//	}
+		if c.ClientIP() == "::1" {
+			ml := make(map[string]interface{})
+			ml["cip"] = c.ClientIP()
+			ml["db"] = db
+			m.HandleRequestWithKeys(c.Writer, c.Request, ml)
+		} else {
+			// redirect via path rewrite
+			url := c.Request.URL
+			url.Host = c.Request.Host
+			url.Path = "/share/board/ws"
+			url.Scheme = "ws"
+			// fmt.Printf("=== %s === \n", url.String())
+			r.ServeHTTP(c.Writer, c.Request)
+		}
 	})
 
 	// Manage websocket messages
@@ -205,23 +213,19 @@ func main() {
 	flag.BoolVar(&debug, "d", false, "Debug mode")
 	flag.Parse()
 
+	// Config server
 	if debug == false {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Config server
-
 	r := gin.New()
-
 	r.Use(gin.Recovery())
 	if debug == true {
 		r.Use(gin.Logger())
 	}
 
 	serv = localServer(serv, p)
-
 	banner(p, serv, pass, version)
-
 	server(r, serv, user, pass, file, debug)
 
 	r.Run(":" + p)
