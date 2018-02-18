@@ -2,6 +2,7 @@ CrisisBoard
 =============
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/yvesago/CrisisBoard)](https://goreportcard.com/report/github.com/yvesago/CrisisBoard)
+[![Build Status](https://travis-ci.org/yvesago/CrisisBoard.svg?branch=master)](https://travis-ci.org/yvesago/CrisisBoard)
 [![Coverage Status](https://coveralls.io/repos/github/yvesago/CrisisBoard/badge.svg?branch=master)](https://coveralls.io/github/yvesago/CrisisBoard)
 
 
